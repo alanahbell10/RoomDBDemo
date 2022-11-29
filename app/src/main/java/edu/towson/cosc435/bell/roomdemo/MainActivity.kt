@@ -26,7 +26,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import edu.towson.cosc435.bell.roomdemo.recipeDB.Recipe
+import edu.towson.cosc435.bell.roomdemo.recipeDB.RecipeViewModel
 import edu.towson.cosc435.bell.roomdemo.ui.theme.RoomDemoTheme
+import androidx.navigation.compose.rememberNavController
+import edu.towson.cosc435.bell.roomdemo.nav.NavRoutes
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,20 +45,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-
-                    val owner = LocalViewModelStoreOwner.current
-
-                    owner?.let {
-                        val viewModel: RecipeViewModel = viewModel(
-                            it,
-                            "RecipeViewModel",
-                            RecipeViewModelFactory(
-                                LocalContext.current.applicationContext
-                                        as Application)
-                        )
-
-                        ScreenSetup(viewModel)
-                    }
+                    MainScreen()
                 }
             }
         }
@@ -59,161 +53,76 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable fun ScreenSetup(viewModel: RecipeViewModel) {
-    val allRecipes by viewModel.allRecipes.observeAsState(listOf())
-    val searchResults by viewModel.searchResults.observeAsState(listOf())
 
     MainScreen(
-        allRecipes = allRecipes,
-        searchResults = searchResults,
-        viewModel = viewModel
+
     )
 }
 
 @Composable fun MainScreen(
-    allRecipes: List<Recipe>,
-    searchResults: List<Recipe>,
-    viewModel: RecipeViewModel
+
 ) {
-    var recipeName by remember { mutableStateOf("") }
-    var recipeServings by remember { mutableStateOf("") }
-    var recipeMinutes by remember { mutableStateOf("") }
-    var searching by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
 
-    val onRecipeTextChange = { text : String ->
-        recipeName = text
-    }
-
-    val onServingsTextChange = { text : String ->
-        recipeServings = text
-    }
-
-    val onMinutesTextChange = { text : String ->
-        recipeMinutes = text
-    }
-
-    Column(
-        horizontalAlignment = CenterHorizontally,
-        modifier = Modifier
-            .fillMaxWidth()
+    NavHost(
+        navController = navController, startDestination = NavRoutes.AddRecipe.route
     ) {
-        CustomTextField(
-            title = "Recipe Name",
-            textState = recipeName,
-            onTextChange = onRecipeTextChange,
-            keyboardType = KeyboardType.Text
-        )
-
-        CustomTextField(
-            title = "Recipe Servings",
-            textState = recipeServings,
-            onTextChange = onServingsTextChange,
-            keyboardType = KeyboardType.Text
-        )
-
-        CustomTextField(
-            title = "Recipe Minutes",
-            textState = recipeMinutes,
-            onTextChange = onMinutesTextChange,
-            keyboardType = KeyboardType.Text
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-        ) {
-            Button(onClick = {
-                if (recipeServings.isNotEmpty() && recipeMinutes.isNotEmpty()) {
-                    viewModel.insertRecipe(
-                        Recipe(
-                            recipeName,
-                            recipeServings.toInt(),
-                            recipeMinutes.toInt()
-                        )
-                    )
-                    searching = false
-                }
-            }) {
-                Text("Add")
-            }
-
-            Button(onClick = {
-                searching = true
-                viewModel.findRecipe(recipeName)
-            }) {
-                Text("Search")
-            }
-
-            Button(onClick = {
-                searching = false
-                viewModel.deleteRecipe(recipeName)
-            }) {
-                Text("Delete")
-            }
-
-            Button(onClick = {
-                searching = false
-                recipeName = ""
-                recipeServings = ""
-                recipeMinutes = ""
-            }) {
-                Text("Clear")
-            }
-
-
-            LazyColumn(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                val list = if (searching) searchResults else allRecipes
-
-                item {
-                    TitleRow(head1 = "ID", head2 = "Recipe", head3 = "Servings", head4 = "Minutes")
-                }
-
-                items(list) { recipe ->
-                    RecipeRow(id = recipe.id, name = recipe.recipeName, servings = recipe.recipeServings, minutes = recipe.recipeMinutes )
-                }
-
-
-            }
+        composable(NavRoutes.AddRecipe.route) {
+            AddRecipe(navController = navController)
         }
+        composable(NavRoutes.Ingredients.route + "/{jsonString}") { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString("jsonString")
+            Ingredients(navController = navController, jsonString.toString())
+        }
+        composable(NavRoutes.Notes.route + "/{jsonWithIngredients}") { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString("jsonWithIngredients")
+            Notes(navController = navController, jsonString.toString())
+        }
+        composable(NavRoutes.NewRecipe.route + "/{jsonWithNotes}") { backStackEntry ->
+            val jsonString = backStackEntry.arguments?.getString("jsonWithNotes")
+            NewRecipe(navController = navController, jsonString.toString() )
+        }
+
     }
 }
 
 @Composable
-fun TitleRow(head1: String, head2: String, head3: String, head4: String) {
+fun TitleRow(head1: String, head2: String, head3: String, head4: String, head5: String, head6: String) {
     Row(
         modifier = Modifier
             .background(MaterialTheme.colors.primary)
             .fillMaxWidth()
             .padding(5.dp)
     ) {
+
         Text(head1, color = Color.White,
-            modifier = Modifier
-                .weight(0.1f))
+            modifier = Modifier.weight(0.1f))
         Text(head2, color = Color.White,
-            modifier = Modifier
-                .weight(0.2f))
+            modifier = Modifier.weight(0.1f))
         Text(head3, color = Color.White,
-            modifier = Modifier.weight(0.2f))
+            modifier = Modifier.weight(0.1f))
+        Text(head4, color = Color.White,
+            modifier = Modifier.weight(0.1f))
+        Text(head5, color = Color.White,
+            modifier = Modifier.weight(0.1f))
+        Text(head6, color = Color.White,
+            modifier = Modifier.weight(0.1f))
     }
 }
 
 @Composable
-fun RecipeRow(id: Int, name: String, servings: Int, minutes: Int) {
+fun RecipeRow(id: Int, name: String, servings: Int, minutes: Int, ingredients: String, notes: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
     ) {
-        Text(id.toString(), modifier = Modifier
-            .weight(0.1f))
-        Text(name, modifier = Modifier.weight(0.2f))
-        Text(servings.toString(), modifier = Modifier.weight(0.2f))
-        Text(minutes.toString(), modifier = Modifier.weight(0.2f))
+        Text(id.toString(), modifier = Modifier.weight(0.1f))
+        Text(name, modifier = Modifier.weight(0.1f))
+        Text(servings.toString(), modifier = Modifier.weight(0.1f))
+        Text(minutes.toString(), modifier = Modifier.weight(0.1f))
+        Text(ingredients, modifier = Modifier.weight(0.1f))
+        Text(notes, modifier = Modifier.weight(0.1f))
     }
 }
 
@@ -238,12 +147,7 @@ fun CustomTextField(
     )
 }
 
-class RecipeViewModelFactory(val application: Application) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return RecipeViewModel(application) as T
-    }
-}
+
 
 
 

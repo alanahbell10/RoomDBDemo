@@ -1,9 +1,10 @@
-package edu.towson.cosc435.bell.roomdemo
+package edu.towson.cosc435.bell.roomdemo.recipeDB
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import edu.towson.cosc435.bell.roomdemo.recipeDB.Recipe
 
 @Dao
 interface RecipeDao {

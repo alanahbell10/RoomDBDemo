@@ -1,4 +1,4 @@
-package edu.towson.cosc435.bell.roomdemo
+package edu.towson.cosc435.bell.roomdemo.recipeDB
 
 import android.content.Context
 import androidx.room.Database
@@ -13,7 +13,7 @@ abstract class RecipeRoomDatabase: RoomDatabase() {
         companion object {
             private var INSTANCE: RecipeRoomDatabase? = null
 
-            fun getInstance(context: Context): RecipeRoomDatabase{
+            fun getInstance(context: Context): RecipeRoomDatabase {
                 synchronized(this) {
                     var instance = INSTANCE
 

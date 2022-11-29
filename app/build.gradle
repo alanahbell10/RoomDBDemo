@@ -7,6 +7,7 @@ plugins {
 android {
     namespace 'edu.towson.cosc435.bell.roomdemo'
     compileSdk 32
+    apply plugin: 'kotlin-kapt'
 
     defaultConfig {
         applicationId "edu.towson.cosc435.bell.roomdemo"
@@ -70,4 +71,12 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
+    implementation 'com.google.code.gson:gson:2.8.5'
+    def nav_version = "2.5.3"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    implementation 'com.squareup.moshi:moshi:1.8.0'
+    kapt 'com.squareup.moshi:moshi-kotlin-codegen:1.8.0'
+
 }
