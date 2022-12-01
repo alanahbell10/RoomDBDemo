@@ -20,7 +20,7 @@ import edu.towson.cosc435.bell.roomdemo.nav.NavRoutes
 import edu.towson.cosc435.bell.roomdemo.recipeDB.Recipe
 
 @Composable
-fun Notes(navController: NavController, jsonString: String) {
+fun Notes(allRecipes: List<Recipe>, viewModel: CookbookViewModel, navController: NavController, jsonString: String) {
 
     var recipeNotes by remember { mutableStateOf("") }
 
@@ -47,7 +47,20 @@ fun Notes(navController: NavController, jsonString: String) {
             )
         }
         item {
-            Button(onClick = { navController.navigate(NavRoutes.NewRecipe.route+ "/$jsonWithNotes") }) {
+            Button(onClick = {
+                if (recipe != null) {
+                    viewModel.insertRecipe(
+                        Recipe(
+                            recipe.recipeName,
+                            recipe.recipeServings,
+                            recipe.recipeMinutes,
+                            recipe.recipeIngredients,
+                            recipe.recipeNotes
+                        )
+                    )
+                }
+                navController.navigate(NavRoutes.ViewRecipes.route+ "/$jsonWithNotes")
+            }) {
                 Text("Add Recipe")
             }
         }
